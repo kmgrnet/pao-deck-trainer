@@ -7,156 +7,257 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-    .card { transition: all 0.3s; }
-    .card:hover { transform: scale(1.05) rotate(2deg); }
-    .suit-heart, .suit-diamond { color: #ef4444; }
-    .suit-spade, .suit-club { color: #1f2937; }
+    .card { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+    .card:hover { transform: scale(1.03); }
+    .answer { display: none; }
+    .revealed .answer { display: block; }
+    .suit-red { color: #ef4444; }
+    .suit-black { color: #111827; }
   </style>
 </head>
-<body class="bg-zinc-950 text-white min-h-screen pb-12">
-  <div class="max-w-5xl mx-auto p-6">
-    <div class="text-center mb-10">
-      <h1 class="text-5xl font-bold flex items-center justify-center gap-4">
-        <span class="text-6xl">🃏</span> PAOL 记忆训练器
-        <span class="text-yellow-400">兄弟专属版</span>
-      </h1>
-      <p class="text-zinc-400 mt-3 text-xl">一次记4张牌 · 16个元素 · 天庭神话风</p>
+<body class="bg-zinc-950 text-white min-h-screen">
+  <div class="max-w-6xl mx-auto p-6">
+    <h1 class="text-5xl font-bold text-center mb-2 flex items-center justify-center gap-3">
+      🃏 PAOL 记忆训练器 <span class="text-yellow-400">兄弟专属版</span>
+    </h1>
+    <p class="text-center text-zinc-400 text-xl mb-10">一次记4张 · 16个元素 · 天庭神话风</p>
+
+    <!-- 模式按钮 -->
+    <div class="flex flex-wrap justify-center gap-3 mb-12">
+      <button onclick="switchMode(0)" id="btn0" class="mode-btn active px-8 py-4 rounded-3xl bg-yellow-400 text-black font-bold text-lg">生成4张练习</button>
+      <button onclick="switchMode(1)" id="btn1" class="mode-btn px-8 py-4 rounded-3xl hover:bg-zinc-800 font-bold text-lg">单张快速练</button>
+      <button onclick="switchMode(2)" id="btn2" class="mode-btn px-8 py-4 rounded-3xl hover:bg-zinc-800 font-bold text-lg">全副牌回忆</button>
+      <button onclick="switchMode(3)" id="btn3" class="mode-btn px-8 py-4 rounded-3xl hover:bg-zinc-800 font-bold text-lg">我的PAOL编码表</button>
     </div>
 
-    <!-- 模式切换 -->
-    <div class="flex justify-center gap-4 mb-10 flex-wrap">
-      <button onclick="switchMode(0)" id="btn0" class="mode-btn active px-8 py-3 rounded-3xl bg-yellow-400 text-black font-bold">生成4张练习</button>
-      <button onclick="switchMode(1)" id="btn1" class="mode-btn px-8 py-3 rounded-3xl hover:bg-zinc-800">单张快速练</button>
-      <button onclick="switchMode(2)" id="btn2" class="mode-btn px-8 py-3 rounded-3xl hover:bg-zinc-800">全副牌回忆</button>
-      <button onclick="switchMode(3)" id="btn3" class="mode-btn px-8 py-3 rounded-3xl hover:bg-zinc-800">我的PAOL编码表</button>
-    </div>
-
-    <!-- 模式0：生成4张 -->
+    <!-- 模式0: 生成4张练习（带答案） -->
     <div id="mode0" class="mode">
-      <div class="flex justify-center gap-6 mb-8">
-        <button onclick="generateFour()" class="px-10 py-5 bg-yellow-400 hover:bg-yellow-300 text-black font-bold text-2xl rounded-3xl shadow-lg">
-          🎲 生成新4张牌
-        </button>
+      <div class="flex justify-center gap-4 mb-8">
+        <button onclick="generateFour()" class="px-10 py-5 bg-yellow-400 hover:bg-yellow-300 text-black font-bold text-2xl rounded-3xl shadow-xl">🎲 生成新4张牌</button>
+        <button onclick="toggleAllAnswers()" id="globalAnswerBtn" class="px-10 py-5 bg-zinc-800 hover:bg-zinc-700 font-bold text-2xl rounded-3xl">📖 显示全部答案</button>
       </div>
-      <div id="fourCards" class="grid grid-cols-2 md:grid-cols-4 gap-6"></div>
+      <div id="fourCards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"></div>
     </div>
 
-    <!-- 其他模式内容...（代码太长，我已全部写好） -->
-    <!-- 这里省略了 mode1/2/3 的 HTML，实际代码里全部包含 -->
+    <!-- 模式1: 单张快速练 -->
+    <div id="mode1" class="mode hidden">
+      <div class="max-w-md mx-auto bg-zinc-900 p-8 rounded-3xl">
+        <button onclick="generateSingle()" class="w-full py-4 bg-yellow-400 text-black font-bold text-xl rounded-3xl mb-8">🎲 抽一张新牌练习</button>
+        <div id="singleCard" class="text-center mb-8 text-8xl font-bold min-h-[120px]"></div>
+        <div class="space-y-6">
+          <div><input id="pInput" placeholder="人物 P" class="w-full p-4 bg-zinc-800 rounded-2xl text-lg"></div>
+          <div><input id="aInput" placeholder="行动 A" class="w-full p-4 bg-zinc-800 rounded-2xl text-lg"></div>
+          <div><input id="oInput" placeholder="对象 O" class="w-full p-4 bg-zinc-800 rounded-2xl text-lg"></div>
+          <div><input id="lInput" placeholder="地点 L" class="w-full p-4 bg-zinc-800 rounded-2xl text-lg"></div>
+        </div>
+        <button onclick="checkSingle()" class="mt-8 w-full py-5 bg-green-500 hover:bg-green-400 text-black font-bold text-2xl rounded-3xl">✅ 提交回忆</button>
+        <div id="singleResult" class="mt-6 text-center text-xl font-bold"></div>
+      </div>
+    </div>
 
+    <!-- 模式2: 全副牌回忆 -->
+    <div id="mode2" class="mode hidden">
+      <input id="search2" onkeyup="filterDeck()" placeholder="🔍 搜索牌面或关键词..." class="w-full p-5 bg-zinc-900 rounded-3xl text-lg mb-8">
+      <div id="fullDeck" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+    </div>
+
+    <!-- 模式3: PAOL编码表 -->
+    <div id="mode3" class="mode hidden">
+      <input id="search3" onkeyup="filterTable()" placeholder="🔍 搜索任意关键词..." class="w-full p-5 bg-zinc-900 rounded-3xl text-lg mb-8">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead><tr class="bg-zinc-900"><th class="p-4 border-b">牌面</th><th class="p-4 border-b">人物 P</th><th class="p-4 border-b">行动 A</th><th class="p-4 border-b">对象 O</th><th class="p-4 border-b">地点 L</th></tr></thead>
+          <tbody id="paolTable"></tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
   <script>
-    // ==================== 你的完整PAOL数据（52张全录入） ====================
-    const paolData = {
-      "A♥": {p:"李白", a:"吟诵", o:"酒壶", l:"敬天台"},
-      "K♥": {p:"玉皇大帝", a:"挥动", o:"金印", l:"凌霄宝殿"},
-      "Q♥": {p:"王母娘娘", a:"采摘", o:"蟠桃", l:"瑶池桃园"},
-      "J♥": {p:"哪吒", a:"投掷", o:"乾坤圈", l:"南天门"},
-      "10♥": {p:"伏羲", a:"推演", o:"八卦图", l:"昆仑山顶"},
-      "9♥": {p:"织女", a:"穿梭", o:"丝绸", l:"彩云间"},
-      "8♥": {p:"灶王爷", a:"烹饪", o:"铁锅", l:"天厨"},
-      "7♥": {p:"姜子牙", a:"垂钓", o:"直钩", l:"渭水边"},
-      "6♥": {p:"嫦娥", a:"奔向", o:"月亮", l:"广寒宫"},
-      "5♥": {p:"二郎神", a:"开启", o:"第三只眼", l:"灌江口"},
-      "4♥": {p:"月老", a:"缠绕", o:"红绳", l:"姻缘树下"},
-      "3♥": {p:"赵公明(财神)", a:"散发", o:"金元宝", l:"金库"},
-      "2♥": {p:"孙悟空", a:"戏耍", o:"金箍棒", l:"花果山"},
-
-      "A♠": {p:"邓丽君", a:"歌唱", o:"麦克风", l:"红磡体育馆"},
-      "K♠": {p:"钱学森", a:"计算", o:"火箭", l:"发射塔架"},
-      "Q♠": {p:"林徽因", a:"测绘", o:"古建筑", l:"四合院"},
-      "J♠": {p:"周润发", a:"射击", o:"双枪", l:"教堂大厅"},
-      "10♠": {p:"郭富城", a:"舞蹈", o:"亮片衣", l:"霓虹灯舞台"},
-      "9♠": {p:"马云", a:"演讲", o:"笔记本电脑", l:"互联网大会"},
-      "8♠": {p:"董卿", a:"朗读", o:"书本", l:"演播室"},
-      "7♠": {p:"李小龙", a:"踢击", o:"双节棍", l:"武道馆"},
-      "6♠": {p:"杨利伟", a:"漫步", o:"空间站", l:"外太空"},
-      "5♠": {p:"齐白石", a:"勾勒", o:"水墨虾", l:"画室书案"},
-      "4♠": {p:"周杰伦", a:"弹奏", o:"钢琴", l:"古典城堡"},
-      "3♠": {p:"张艺谋", a:"导演", o:"摄像机", l:"电影片场"},
-      "2♠": {p:"成龙", a:"攀爬", o:"梯子", l:"商场中庭"},
-
-      "A♦": {p:"曹植", a:"七步成诗", o:"墨宝", l:"铜雀台"},
-      "K♦": {p:"秦始皇", a:"统一", o:"秦王剑", l:"阿房宫"},
-      "Q♦": {p:"花木兰", a:"梳妆/从军", o:"长弓", l:"军营帐篷"},
-      "J♦": {p:"徐霞客", a:"攀登", o:"登山杖", l:"黄山之巅"},
-      "10♦": {p:"吴道子", a:"挥毫", o:"壁画", l:"敦煌石窟"},
-      "9♦": {p:"狄仁杰", a:"断案", o:"亢龙锏", l:"大理寺"},
-      "8♦": {p:"沈万三", a:"计数", o:"聚宝盆", l:"江南当铺"},
-      "7♦": {p:"欧冶子", a:"锻造", o:"铸剑炉", l:"龙泉深林"},
-      "6♦": {p:"祖冲之", a:"刻划", o:"算筹", l:"天文台"},
-      "5♦": {p:"华佗", a:"针灸", o:"药匣", l:"医馆药房"},
-      "4♦": {p:"郑和", a:"掌舵", o:"罗盘", l:"宝船甲板"},
-      "3♦": {p:"神农氏", a:"尝百草", o:"药草袋", l:"深山老林"},
-      "2♦": {p:"吴承恩", a:"著书", o:"鹅毛笔/卷轴", l:"草庐书斋"},
-
-      "A♣": {p:"盘古", a:"撑开", o:"天地", l:"混沌虚空"},
-      "K♣": {p:"雷公", a:"敲击", o:"雷锤", l:"黑云顶"},
-      "Q♣": {p:"九尾狐", a:"魅惑", o:"狐尾", l:"青丘山"},
-      "J♣": {p:"东海龙王", a:"呼风唤雨", o:"定海神针", l:"龙宫大殿"},
-      "10♣": {p:"女娲", a:"捏塑", o:"黄土人", l:"黄河河滩"},
-      "9♣": {p:"后羿", a:"瞄准", o:"太阳", l:"十日荒野"},
-      "8♣": {p:"济公", a:"摇晃", o:"酒葫芦", l:"灵隐寺前"},
-      "7♣": {p:"杨贵妃", a:"醉酒", o:"牡丹花", l:"华清池"},
-      "6♣": {p:"阎罗王", a:"勾魂", o:"生死簿", l:"森罗殿"},
-      "5♣": {p:"扁鹊", a:"诊脉", o:"银针", l:"王府内室"},
-      "4♣": {p:"蚩尤", a:"冲锋", o:"巨斧", l:"逐鹿战场"},
-      "3♣": {p:"九天玄女", a:"布阵", o:"兵法书", l:"古战场沙盘"},
-      "2♣": {p:"土地公", a:"遁地", o:"拐杖", l:"土地庙口"}
+    const paolData = { /* 你的52张完整数据（已全部录入） */ 
+      "A♥":{p:"李白",a:"吟诵",o:"酒壶",l:"敬天台"},"K♥":{p:"玉皇大帝",a:"挥动",o:"金印",l:"凌霄宝殿"},
+      "Q♥":{p:"王母娘娘",a:"采摘",o:"蟠桃",l:"瑶池桃园"},"J♥":{p:"哪吒",a:"投掷",o:"乾坤圈",l:"南天门"},
+      "10♥":{p:"伏羲",a:"推演",o:"八卦图",l:"昆仑山顶"},"9♥":{p:"织女",a:"穿梭",o:"丝绸",l:"彩云间"},
+      "8♥":{p:"灶王爷",a:"烹饪",o:"铁锅",l:"天厨"},"7♥":{p:"姜子牙",a:"垂钓",o:"直钩",l:"渭水边"},
+      "6♥":{p:"嫦娥",a:"奔向",o:"月亮",l:"广寒宫"},"5♥":{p:"二郎神",a:"开启",o:"第三只眼",l:"灌江口"},
+      "4♥":{p:"月老",a:"缠绕",o:"红绳",l:"姻缘树下"},"3♥":{p:"赵公明(财神)",a:"散发",o:"金元宝",l:"金库"},
+      "2♥":{p:"孙悟空",a:"戏耍",o:"金箍棒",l:"花果山"},
+      "A♠":{p:"邓丽君",a:"歌唱",o:"麦克风",l:"红磡体育馆"},"K♠":{p:"钱学森",a:"计算",o:"火箭",l:"发射塔架"},
+      "Q♠":{p:"林徽因",a:"测绘",o:"古建筑",l:"四合院"},"J♠":{p:"周润发",a:"射击",o:"双枪",l:"教堂大厅"},
+      "10♠":{p:"郭富城",a:"舞蹈",o:"亮片衣",l:"霓虹灯舞台"},"9♠":{p:"马云",a:"演讲",o:"笔记本电脑",l:"互联网大会"},
+      "8♠":{p:"董卿",a:"朗读",o:"书本",l:"演播室"},"7♠":{p:"李小龙",a:"踢击",o:"双节棍",l:"武道馆"},
+      "6♠":{p:"杨利伟",a:"漫步",o:"空间站",l:"外太空"},"5♠":{p:"齐白石",a:"勾勒",o:"水墨虾",l:"画室书案"},
+      "4♠":{p:"周杰伦",a:"弹奏",o:"钢琴",l:"古典城堡"},"3♠":{p:"张艺谋",a:"导演",o:"摄像机",l:"电影片场"},
+      "2♠":{p:"成龙",a:"攀爬",o:"梯子",l:"商场中庭"},
+      "A♦":{p:"曹植",a:"七步成诗",o:"墨宝",l:"铜雀台"},"K♦":{p:"秦始皇",a:"统一",o:"秦王剑",l:"阿房宫"},
+      "Q♦":{p:"花木兰",a:"梳妆/从军",o:"长弓",l:"军营帐篷"},"J♦":{p:"徐霞客",a:"攀登",o:"登山杖",l:"黄山之巅"},
+      "10♦":{p:"吴道子",a:"挥毫",o:"壁画",l:"敦煌石窟"},"9♦":{p:"狄仁杰",a:"断案",o:"亢龙锏",l:"大理寺"},
+      "8♦":{p:"沈万三",a:"计数",o:"聚宝盆",l:"江南当铺"},"7♦":{p:"欧冶子",a:"锻造",o:"铸剑炉",l:"龙泉深林"},
+      "6♦":{p:"祖冲之",a:"刻划",o:"算筹",l:"天文台"},"5♦":{p:"华佗",a:"针灸",o:"药匣",l:"医馆药房"},
+      "4♦":{p:"郑和",a:"掌舵",o:"罗盘",l:"宝船甲板"},"3♦":{p:"神农氏",a:"尝百草",o:"药草袋",l:"深山老林"},
+      "2♦":{p:"吴承恩",a:"著书",o:"鹅毛笔/卷轴",l:"草庐书斋"},
+      "A♣":{p:"盘古",a:"撑开",o:"天地",l:"混沌虚空"},"K♣":{p:"雷公",a:"敲击",o:"雷锤",l:"黑云顶"},
+      "Q♣":{p:"九尾狐",a:"魅惑",o:"狐尾",l:"青丘山"},"J♣":{p:"东海龙王",a:"呼风唤雨",o:"定海神针",l:"龙宫大殿"},
+      "10♣":{p:"女娲",a:"捏塑",o:"黄土人",l:"黄河河滩"},"9♣":{p:"后羿",a:"瞄准",o:"太阳",l:"十日荒野"},
+      "8♣":{p:"济公",a:"摇晃",o:"酒葫芦",l:"灵隐寺前"},"7♣":{p:"杨贵妃",a:"醉酒",o:"牡丹花",l:"华清池"},
+      "6♣":{p:"阎罗王",a:"勾魂",o:"生死簿",l:"森罗殿"},"5♣":{p:"扁鹊",a:"诊脉",o:"银针",l:"王府内室"},
+      "4♣":{p:"蚩尤",a:"冲锋",o:"巨斧",l:"逐鹿战场"},"3♣":{p:"九天玄女",a:"布阵",o:"兵法书",l:"古战场沙盘"},
+      "2♣":{p:"土地公",a:"遁地",o:"拐杖",l:"土地庙口"}
     };
 
     const suits = ['♥','♠','♦','♣'];
     const ranks = ['A','K','Q','J','10','9','8','7','6','5','4','3','2'];
+    let currentFour = [];
+    let showAll = false;
 
-    function getCardHTML(cardKey) {
-      const suit = cardKey.slice(-1);
-      const rank = cardKey.slice(0, -1);
-      const color = (suit === '♥' || suit === '♦') ? 'suit-heart' : 'suit-spade';
+    function getCardHTML(key, isFour = false) {
+      const suit = key.slice(-1);
+      const rank = key.slice(0, -1);
+      const color = (suit === '♥' || suit === '♦') ? 'suit-red' : 'suit-black';
+      const data = paolData[key];
       return `
-        <div class="card bg-zinc-900 border-4 border-zinc-700 rounded-3xl p-6 text-center shadow-2xl">
-          <div class="text-7xl font-bold ${color}">${rank}<span class="text-8xl">${suit}</span></div>
-          <div class="mt-6 space-y-3 text-left text-lg">
-            <div><span class="text-yellow-400 font-medium">人：</span>${paolData[cardKey].p}</div>
-            <div><span class="text-yellow-400 font-medium">行：</span>${paolData[cardKey].a}</div>
-            <div><span class="text-yellow-400 font-medium">物：</span>${paolData[cardKey].o}</div>
-            <div><span class="text-yellow-400 font-medium">地：</span>${paolData[cardKey].l}</div>
+        <div class="card bg-zinc-900 border-4 border-zinc-700 rounded-3xl p-6 shadow-2xl" id="card-${key}">
+          <div class="text-center">
+            <div class="text-7xl font-bold ${color}">${rank}<span class="text-8xl">${suit}</span></div>
+            <button onclick="toggleCard('${key}')" class="mt-6 px-6 py-3 bg-yellow-400 text-black font-bold rounded-2xl w-full">🔍 显示答案</button>
           </div>
-        </div>
-      `;
+          <div class="answer mt-6 space-y-3 text-lg border-t border-zinc-700 pt-6">
+            <div><span class="text-yellow-400">人：</span>${data.p}</div>
+            <div><span class="text-yellow-400">行：</span>${data.a}</div>
+            <div><span class="text-yellow-400">物：</span>${data.o}</div>
+            <div><span class="text-yellow-400">地：</span>${data.l}</div>
+          </div>
+        </div>`;
     }
 
     function generateFour() {
       const container = document.getElementById('fourCards');
       container.innerHTML = '';
+      currentFour = [];
       const used = new Set();
       for (let i = 0; i < 4; i++) {
         let key;
         do {
-          const rank = ranks[Math.floor(Math.random()*13)];
-          const suit = suits[Math.floor(Math.random()*4)];
-          key = rank + suit;
+          key = ranks[Math.floor(Math.random()*13)] + suits[Math.floor(Math.random()*4)];
         } while (used.has(key));
         used.add(key);
-        container.innerHTML += getCardHTML(key);
+        currentFour.push(key);
+        container.innerHTML += getCardHTML(key, true);
       }
+      showAll = false;
+      document.getElementById('globalAnswerBtn').textContent = '📖 显示全部答案';
     }
 
-    // 模式切换函数（完整版已包含在实际代码中）
+    function toggleCard(key) {
+      const card = document.getElementById('card-' + key);
+      card.classList.toggle('revealed');
+    }
+
+    function toggleAllAnswers() {
+      showAll = !showAll;
+      const btn = document.getElementById('globalAnswerBtn');
+      btn.textContent = showAll ? '🙈 隐藏全部答案' : '📖 显示全部答案';
+      currentFour.forEach(key => {
+        const card = document.getElementById('card-' + key);
+        if (card) card.classList.toggle('revealed', showAll);
+      });
+    }
+
+    // 单张快速练
+    let currentSingle = null;
+    function generateSingle() {
+      let key;
+      do { key = ranks[Math.floor(Math.random()*13)] + suits[Math.floor(Math.random()*4)]; } while (key === currentSingle);
+      currentSingle = key;
+      document.getElementById('singleCard').innerHTML = `<span class="${(key.endsWith('♥')||key.endsWith('♦'))?'text-red-500':'text-white'} text-9xl">${key}</span>`;
+      document.getElementById('pInput').value = '';
+      document.getElementById('aInput').value = '';
+      document.getElementById('oInput').value = '';
+      document.getElementById('lInput').value = '';
+      document.getElementById('singleResult').innerHTML = '';
+    }
+
+    function checkSingle() {
+      if (!currentSingle) return;
+      const data = paolData[currentSingle];
+      const p = document.getElementById('pInput').value.trim();
+      const a = document.getElementById('aInput').value.trim();
+      const o = document.getElementById('oInput').value.trim();
+      const l = document.getElementById('lInput').value.trim();
+      
+      let score = 0, msg = '';
+      if (p === data.p) score++;
+      if (a === data.a) score++;
+      if (o === data.o) score++;
+      if (l === data.l) score++;
+      
+      if (score === 4) msg = '🎉 完美！全对！';
+      else msg = `👍 ${score}/4 正确<br><small class="text-zinc-400">正确答案：<br>P:${data.p}<br>A:${data.a}<br>O:${data.o}<br>L:${data.l}</small>`;
+      
+      document.getElementById('singleResult').innerHTML = msg;
+    }
+
+    // 全副牌回忆
+    function renderFullDeck(filter = '') {
+      const container = document.getElementById('fullDeck');
+      container.innerHTML = '';
+      Object.keys(paolData).forEach(key => {
+        if (filter && !key.includes(filter) && !paolData[key].p.includes(filter) && !paolData[key].a.includes(filter) && !paolData[key].o.includes(filter) && !paolData[key].l.includes(filter)) return;
+        container.innerHTML += `
+          <div onclick="this.classList.toggle('revealed')" class="card bg-zinc-900 border border-zinc-700 rounded-3xl p-4 text-center cursor-pointer">
+            <div class="text-5xl font-bold ${(key.endsWith('♥')||key.endsWith('♦'))?'suit-red':'suit-black'}">${key}</div>
+            <div class="answer mt-4 text-sm text-left space-y-1">
+              <div>P: ${paolData[key].p}</div>
+              <div>A: ${paolData[key].a}</div>
+              <div>O: ${paolData[key].o}</div>
+              <div>L: ${paolData[key].l}</div>
+            </div>
+          </div>`;
+      });
+    }
+
+    function filterDeck() {
+      renderFullDeck(document.getElementById('search2').value.trim());
+    }
+
+    // 编码表
+    function renderTable(filter = '') {
+      const tbody = document.getElementById('paolTable');
+      tbody.innerHTML = '';
+      Object.keys(paolData).forEach(key => {
+        const d = paolData[key];
+        if (filter && !key.includes(filter) && !d.p.includes(filter) && !d.a.includes(filter) && !d.o.includes(filter) && !d.l.includes(filter)) return;
+        tbody.innerHTML += `
+          <tr class="border-b border-zinc-800 hover:bg-zinc-900">
+            <td class="p-4 font-bold text-xl ${(key.endsWith('♥')||key.endsWith('♦'))?'text-red-500':'text-white'}">${key}</td>
+            <td class="p-4">${d.p}</td>
+            <td class="p-4">${d.a}</td>
+            <td class="p-4">${d.o}</td>
+            <td class="p-4">${d.l}</td>
+          </tr>`;
+      });
+    }
+
+    function filterTable() {
+      renderTable(document.getElementById('search3').value.trim());
+    }
+
     function switchMode(n) {
       document.querySelectorAll('.mode').forEach(m => m.classList.add('hidden'));
-      document.getElementById('mode'+n).classList.remove('hidden');
-      document.querySelectorAll('.mode-btn').forEach((b,i) => {
-        b.classList.toggle('active', i===n);
-        b.classList.toggle('bg-yellow-400', i===n);
-        b.classList.toggle('text-black', i===n);
+      document.getElementById('mode' + n).classList.remove('hidden');
+      document.querySelectorAll('.mode-btn').forEach((b, i) => {
+        b.classList.toggle('active', i === n);
+        b.classList.toggle('bg-yellow-400', i === n);
+        b.classList.toggle('text-black', i === n);
       });
+      if (n === 2) renderFullDeck();
+      if (n === 3) renderTable();
     }
 
     // 初始化
     window.onload = () => {
       switchMode(0);
-      generateFour(); // 第一次自动生成
+      generateFour();
     };
   </script>
 </body>
