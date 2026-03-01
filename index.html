@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>数字玩家 OAOT 记忆训练器 - 4花色终极版</title>
+  <title>兄弟 OAOT 记忆训练器 - 4花色终极版</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body class="bg-zinc-950 text-white min-h-screen">
-  <div class="max-w-4xl mx-auto p-6">
+  <div class="max-w-6xl mx-auto p-6">
     <h1 class="text-4xl font-bold text-center mb-8 flex items-center justify-center gap-3">
-      <i class="fas fa-brain text-yellow-400"></i> 数字玩家 OAOT 记忆训练器（4花色终极版）
+      <i class="fas fa-brain text-yellow-400"></i> 兄弟 OAOT 记忆训练器（4花色终极版）
     </h1>
 
     <div class="flex justify-center gap-4 mb-8 flex-wrap">
@@ -61,15 +61,15 @@
       </div>
     </div>
 
-    <!-- 映射表 + 搜索框 -->
+    <!-- 完整映射表 -->
     <div id="tab1" class="tab hidden">
       <div class="bg-zinc-800 p-4 rounded-t-3xl">
         <input id="searchInput" type="text" 
                class="w-full bg-zinc-900 border border-zinc-700 rounded-2xl px-6 py-4 text-lg focus:outline-none focus:border-yellow-400"
-               placeholder="🔍 搜索形象、动作、物体、地点、牌点...">
+               placeholder="🔍 搜索形象、动作、物体、地点、故事...">
       </div>
-      <div class="bg-zinc-900 rounded-b-3xl overflow-hidden">
-        <table class="w-full text-left">
+      <div class="bg-zinc-900 rounded-b-3xl overflow-x-auto">
+        <table class="w-full text-left min-w-[1300px]">
           <thead class="bg-zinc-800 sticky top-0">
             <tr>
               <th class="p-4">花色</th>
@@ -78,6 +78,7 @@
               <th class="p-4">动作</th>
               <th class="p-4">物体</th>
               <th class="p-4">地点</th>
+              <th class="p-4 w-[420px]">完整故事</th>
             </tr>
           </thead>
           <tbody id="tableBody" class="text-sm"></tbody>
@@ -94,14 +95,11 @@
   <div id="shareModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50">
     <div class="bg-zinc-900 rounded-3xl max-w-sm w-full mx-4 p-8 text-center">
       <h2 class="text-2xl font-bold mb-6">分享到微信</h2>
-      
       <div id="qrCode" class="mx-auto bg-white p-4 rounded-2xl inline-block mb-6"></div>
-      
       <div class="bg-zinc-800 rounded-2xl p-4 mb-6 text-left text-sm">
-        <div class="font-medium mb-2">推荐文案（已复制到剪贴板）</div>
+        <div class="font-medium mb-2">推荐文案（已复制）</div>
         <div id="shareText" class="text-zinc-300 leading-relaxed"></div>
       </div>
-
       <div class="flex gap-4">
         <button onclick="copyShareText()" class="flex-1 bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-4 rounded-2xl">📋 复制文案</button>
         <button onclick="closeShareModal()" class="flex-1 bg-zinc-700 hover:bg-zinc-600 font-bold py-4 rounded-2xl">关闭</button>
@@ -110,8 +108,7 @@
   </div>
 
   <script>
-    // === 4花色数据（不变）===
-    const ranks = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+    const ranks = ['A','2','3','4','5','6','7','8','9','T','J','Q','K'];
     const suits = ['♥','♦','♣','♠'];
     const suitColors = {'♥':'text-red-500','♦':'text-red-500','♣':'text-black','♠':'text-black'};
 
@@ -125,14 +122,24 @@
     let practiceCount = parseInt(localStorage.getItem('oaotCount')) || 0;
     let currentSingle = null;
     let currentFour = null;
-    let qrCodeInstance = null;
-
     const siteUrl = window.location.href;
-    const shareTextBase = `兄弟，我在用这个超强的OAOT记忆训练器练习！\n4花色52张全自定义编码，单张+4张连锁模式超好用！\n快来一起练：${siteUrl}`;
+    const shareTextBase = `兄弟，我在用这个超强OAOT记忆训练器！4花色52张全自定义+完整故事+语音朗读，超好记！快来练：${siteUrl}`;
 
     function updateCount() {
       document.getElementById('count').textContent = practiceCount;
       localStorage.setItem('oaotCount', practiceCount);
+    }
+
+    // 自动语音朗读（中文）
+    function speak(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'zh-CN';
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+        window.speechSynthesis.speak(utterance);
+      }
     }
 
     // 单张练习
@@ -150,15 +157,21 @@
     function showSingleAnswer() {
       if (!currentSingle) return;
       const d = currentSingle.data;
+      const idx = currentSingle.rankIdx;
       document.getElementById('suitDisplaySingle').innerHTML = `<span class="${suitColors[currentSingle.suit]}">${currentSingle.suit}</span>`;
       document.getElementById('rankDisplaySingle').textContent = currentSingle.rank;
-      document.getElementById('personSingle').textContent = d.persons[currentSingle.rankIdx];
-      document.getElementById('actionSingle').textContent = d.actions[currentSingle.rankIdx];
-      document.getElementById('o2Single').textContent = d.o2s[currentSingle.rankIdx];
-      document.getElementById('locSingle').textContent = d.locs[currentSingle.rankIdx];
+      document.getElementById('personSingle').textContent = d.persons[idx];
+      document.getElementById('actionSingle').textContent = d.actions[idx];
+      document.getElementById('o2Single').textContent = d.o2s[idx];
+      document.getElementById('locSingle').textContent = d.locs[idx];
       document.getElementById('answerSingle').classList.remove('hidden');
       document.getElementById('showBtnSingle').classList.add('hidden');
       document.getElementById('shareBtnSingle').classList.remove('hidden');
+
+      // 自动朗读完整故事
+      const story = `${d.persons[idx]}${d.actions[idx]}${d.o2s[idx]}，在${d.locs[idx]}。`;
+      speak(story);
+
       practiceCount++;
       updateCount();
     }
@@ -176,23 +189,13 @@
         if (!used.has(key)) {
           used.add(key);
           const data = oaotData[suit];
-          allCards.push({
-            suit, rank, rankIdx: rIdx,
-            person: data.persons[rIdx],
-            action: data.actions[rIdx],
-            o2: data.o2s[rIdx],
-            loc: data.locs[rIdx]
-          });
+          allCards.push({suit, rank, rankIdx: rIdx, person: data.persons[rIdx], action: data.actions[rIdx], o2: data.o2s[rIdx], loc: data.locs[rIdx]});
         }
       }
       currentFour = allCards;
-
       let html = '';
       allCards.forEach((c, i) => {
-        html += `<div class="bg-zinc-800 rounded-2xl p-4 text-center">
-          <div class="text-5xl font-bold ${suitColors[c.suit]}">${c.rank}<span class="text-4xl">${c.suit}</span></div>
-          <div class="text-xs text-zinc-500 mt-2">第${i+1}张</div>
-        </div>`;
+        html += `<div class="bg-zinc-800 rounded-2xl p-4 text-center"><div class="text-5xl font-bold ${suitColors[c.suit]}">${c.rank}<span class="text-4xl">${c.suit}</span></div><div class="text-xs text-zinc-500 mt-2">第${i+1}张</div></div>`;
       });
       document.getElementById('fourCards').innerHTML = html;
       document.getElementById('showBtnFour').classList.remove('hidden');
@@ -207,11 +210,39 @@
       document.getElementById('fourAnswer').classList.remove('hidden');
       document.getElementById('showBtnFour').classList.add('hidden');
       document.getElementById('shareBtnFour').classList.remove('hidden');
+
+      // 自动朗读连锁答案
+      speak(result);
+
       practiceCount++;
       updateCount();
     }
 
-    // 搜索框
+    // 渲染映射表（52张完整故事）
+    function renderTable() {
+      let html = '';
+      suits.forEach(suit => {
+        const data = oaotData[suit];
+        ranks.forEach((r, i) => {
+          const p = data.persons[i];
+          const a = data.actions[i];
+          const o = data.o2s[i];
+          const l = data.locs[i];
+          const story = `${p}${a}${o}，在${l}。`;
+          html += `<tr class="border-t border-zinc-700 hover:bg-zinc-800">
+            <td class="p-4"><span class="${suitColors[suit]} text-xl">${suit}</span></td>
+            <td class="p-4 font-bold">${r}</td>
+            <td class="p-4">${p}</td>
+            <td class="p-4">${a}</td>
+            <td class="p-4">${o}</td>
+            <td class="p-4">${l}</td>
+            <td class="p-4 text-emerald-300">${story}</td>
+          </tr>`;
+        });
+      });
+      document.getElementById('tableBody').innerHTML = html;
+    }
+
     function setupSearch() {
       const input = document.getElementById('searchInput');
       input.addEventListener('input', () => {
@@ -224,52 +255,19 @@
       });
     }
 
-    // 渲染映射表
-    function renderTable() {
-      let html = '';
-      suits.forEach(suit => {
-        const data = oaotData[suit];
-        ranks.forEach((r, i) => {
-          html += `<tr class="border-t border-zinc-700 hover:bg-zinc-800">
-            <td class="p-4"><span class="${suitColors[suit]} text-xl">${suit}</span></td>
-            <td class="p-4 font-bold">${r}</td>
-            <td class="p-4">${data.persons[i]}</td>
-            <td class="p-4">${data.actions[i]}</td>
-            <td class="p-4">${data.o2s[i]}</td>
-            <td class="p-4">${data.locs[i]}</td>
-          </tr>`;
-        });
-      });
-      document.getElementById('tableBody').innerHTML = html;
-    }
-
-    // 微信分享
     function shareToWeChat() {
       const modal = document.getElementById('shareModal');
       modal.classList.remove('hidden');
-
-      // 生成二维码
       const qrDiv = document.getElementById('qrCode');
       qrDiv.innerHTML = '';
-      new QRCode(qrDiv, {
-        text: siteUrl,
-        width: 220,
-        height: 220,
-        colorDark: "#000000",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.H
-      });
-
-      // 文案
+      new QRCode(qrDiv, {text: siteUrl, width: 220, height: 220});
       document.getElementById('shareText').textContent = shareTextBase;
-
-      // 自动复制文案
       navigator.clipboard.writeText(shareTextBase);
     }
 
     function copyShareText() {
       navigator.clipboard.writeText(shareTextBase);
-      alert('✅ 文案已复制到剪贴板，直接发微信给兄弟们吧！');
+      alert('✅ 文案已复制，快发给兄弟们一起练！');
     }
 
     function closeShareModal() {
@@ -279,21 +277,17 @@
     function showTab(n) {
       document.querySelectorAll('.tab').forEach(t => t.classList.add('hidden'));
       document.getElementById('tab' + n).classList.remove('hidden');
-
       document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active', 'bg-yellow-400', 'text-black');
-        if (btn.getAttribute('onclick').includes(n)) {
-          btn.classList.add('active', 'bg-yellow-400', 'text-black');
-        }
+        btn.classList.toggle('active', btn.getAttribute('onclick').includes(n));
+        btn.classList.toggle('bg-yellow-400', btn.getAttribute('onclick').includes(n));
+        btn.classList.toggle('text-black', btn.getAttribute('onclick').includes(n));
       });
-
       if (n === 1) renderTable();
     }
 
     // 初始化
     showTab(0);
     updateCount();
-    renderTable();
     setupSearch();
   </script>
 </body>
