@@ -3,262 +3,185 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PAOL 记忆训练器 - 兄弟专属版</title>
+  <title>兄弟 OAOT 记忆训练器 - 4花色终极版</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <style>
-    .card { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-    .card:hover { transform: scale(1.03); }
-    .answer { display: none; }
-    .revealed .answer { display: block; }
-    .suit-red { color: #ef4444; }
-    .suit-black { color: #111827; }
-  </style>
 </head>
 <body class="bg-zinc-950 text-white min-h-screen">
-  <div class="max-w-6xl mx-auto p-6">
-    <h1 class="text-5xl font-bold text-center mb-2 flex items-center justify-center gap-3">
-      🃏 PAOL 记忆训练器 <span class="text-yellow-400">兄弟专属版</span>
+  <div class="max-w-4xl mx-auto p-6">
+    <h1 class="text-4xl font-bold text-center mb-8 flex items-center justify-center gap-3">
+      <i class="fas fa-brain text-yellow-400"></i> 兄弟 OAOT 记忆训练器（4花色终极版）
     </h1>
-    <p class="text-center text-zinc-400 text-xl mb-10">一次记4张 · 16个元素 · 天庭神话风</p>
 
-    <!-- 模式按钮 -->
-    <div class="flex flex-wrap justify-center gap-3 mb-12">
-      <button onclick="switchMode(0)" id="btn0" class="mode-btn active px-8 py-4 rounded-3xl bg-yellow-400 text-black font-bold text-lg">生成4张练习</button>
-      <button onclick="switchMode(1)" id="btn1" class="mode-btn px-8 py-4 rounded-3xl hover:bg-zinc-800 font-bold text-lg">单张快速练</button>
-      <button onclick="switchMode(2)" id="btn2" class="mode-btn px-8 py-4 rounded-3xl hover:bg-zinc-800 font-bold text-lg">全副牌回忆</button>
-      <button onclick="switchMode(3)" id="btn3" class="mode-btn px-8 py-4 rounded-3xl hover:bg-zinc-800 font-bold text-lg">我的PAOL编码表</button>
+    <div class="flex justify-center gap-4 mb-8 flex-wrap">
+      <button onclick="showTab(0)" class="tab-btn active px-6 py-2 rounded-full bg-yellow-400 text-black font-medium">练习模式</button>
+      <button onclick="showTab(1)" class="tab-btn px-6 py-2 rounded-full hover:bg-zinc-800">完整映射表</button>
     </div>
 
-    <!-- 模式0: 生成4张练习（带答案） -->
-    <div id="mode0" class="mode">
-      <div class="flex justify-center gap-4 mb-8">
-        <button onclick="generateFour()" class="px-10 py-5 bg-yellow-400 hover:bg-yellow-300 text-black font-bold text-2xl rounded-3xl shadow-xl">🎲 生成新4张牌</button>
-        <button onclick="toggleAllAnswers()" id="globalAnswerBtn" class="px-10 py-5 bg-zinc-800 hover:bg-zinc-700 font-bold text-2xl rounded-3xl">📖 显示全部答案</button>
-      </div>
-      <div id="fourCards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"></div>
-    </div>
-
-    <!-- 模式1: 单张快速练 -->
-    <div id="mode1" class="mode hidden">
-      <div class="max-w-md mx-auto bg-zinc-900 p-8 rounded-3xl">
-        <button onclick="generateSingle()" class="w-full py-4 bg-yellow-400 text-black font-bold text-xl rounded-3xl mb-8">🎲 抽一张新牌练习</button>
-        <div id="singleCard" class="text-center mb-8 text-8xl font-bold min-h-[120px]"></div>
-        <div class="space-y-6">
-          <div><input id="pInput" placeholder="人物 P" class="w-full p-4 bg-zinc-800 rounded-2xl text-lg"></div>
-          <div><input id="aInput" placeholder="行动 A" class="w-full p-4 bg-zinc-800 rounded-2xl text-lg"></div>
-          <div><input id="oInput" placeholder="对象 O" class="w-full p-4 bg-zinc-800 rounded-2xl text-lg"></div>
-          <div><input id="lInput" placeholder="地点 L" class="w-full p-4 bg-zinc-800 rounded-2xl text-lg"></div>
+    <!-- 练习 Tab -->
+    <div id="tab0" class="tab">
+      <div class="bg-zinc-900 p-8 rounded-3xl text-center">
+        <div id="card" class="text-8xl font-bold mb-8 text-yellow-400">点击抽牌</div>
+        <button onclick="drawCard()" 
+                class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold text-2xl py-6 rounded-3xl mb-6">
+          🎴 抽一张牌
+        </button>
+        
+        <div id="answer" class="hidden bg-zinc-800 p-6 rounded-3xl text-left space-y-4">
+          <div class="grid grid-cols-2 gap-4 text-lg">
+            <div><span class="text-yellow-400">花色：</span><span id="suitDisplay" class="font-bold"></span></div>
+            <div><span class="text-yellow-400">牌点：</span><span id="rankDisplay"></span></div>
+            <div><span class="text-yellow-400">形象：</span><span id="person" class="font-medium"></span></div>
+            <div><span class="text-yellow-400">动作：</span><span id="action"></span></div>
+            <div><span class="text-yellow-400">物体：</span><span id="o2"></span></div>
+            <div><span class="text-yellow-400">地点：</span><span id="loc"></span></div>
+          </div>
         </div>
-        <button onclick="checkSingle()" class="mt-8 w-full py-5 bg-green-500 hover:bg-green-400 text-black font-bold text-2xl rounded-3xl">✅ 提交回忆</button>
-        <div id="singleResult" class="mt-6 text-center text-xl font-bold"></div>
+
+        <button onclick="showAnswer()" id="showBtn"
+                class="hidden mt-4 w-full bg-green-500 hover:bg-green-400 text-black font-bold py-4 rounded-3xl">
+          👀 显示 OAOT 答案
+        </button>
+      </div>
+      
+      <div class="text-center mt-6 text-zinc-400">
+        已练习 <span id="count" class="text-yellow-400 font-bold">0</span> 次
       </div>
     </div>
 
-    <!-- 模式2: 全副牌回忆 -->
-    <div id="mode2" class="mode hidden">
-      <input id="search2" onkeyup="filterDeck()" placeholder="🔍 搜索牌面或关键词..." class="w-full p-5 bg-zinc-900 rounded-3xl text-lg mb-8">
-      <div id="fullDeck" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
-    </div>
-
-    <!-- 模式3: PAOL编码表 -->
-    <div id="mode3" class="mode hidden">
-      <input id="search3" onkeyup="filterTable()" placeholder="🔍 搜索任意关键词..." class="w-full p-5 bg-zinc-900 rounded-3xl text-lg mb-8">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-          <thead><tr class="bg-zinc-900"><th class="p-4 border-b">牌面</th><th class="p-4 border-b">人物 P</th><th class="p-4 border-b">行动 A</th><th class="p-4 border-b">对象 O</th><th class="p-4 border-b">地点 L</th></tr></thead>
-          <tbody id="paolTable"></tbody>
+    <!-- 映射表 Tab -->
+    <div id="tab1" class="tab hidden">
+      <div class="bg-zinc-900 rounded-3xl overflow-hidden">
+        <table class="w-full text-left">
+          <thead class="bg-zinc-800 sticky top-0">
+            <tr>
+              <th class="p-4">花色</th>
+              <th class="p-4">牌</th>
+              <th class="p-4">形象</th>
+              <th class="p-4">动作</th>
+              <th class="p-4">物体</th>
+              <th class="p-4">地点</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody" class="text-sm"></tbody>
         </table>
       </div>
     </div>
   </div>
 
   <script>
-    const paolData = { /* 你的52张完整数据（已全部录入） */ 
-      "A♥":{p:"李白",a:"吟诵",o:"酒壶",l:"敬天台"},"K♥":{p:"玉皇大帝",a:"挥动",o:"金印",l:"凌霄宝殿"},
-      "Q♥":{p:"王母娘娘",a:"采摘",o:"蟠桃",l:"瑶池桃园"},"J♥":{p:"哪吒",a:"投掷",o:"乾坤圈",l:"南天门"},
-      "10♥":{p:"伏羲",a:"推演",o:"八卦图",l:"昆仑山顶"},"9♥":{p:"织女",a:"穿梭",o:"丝绸",l:"彩云间"},
-      "8♥":{p:"灶王爷",a:"烹饪",o:"铁锅",l:"天厨"},"7♥":{p:"姜子牙",a:"垂钓",o:"直钩",l:"渭水边"},
-      "6♥":{p:"嫦娥",a:"奔向",o:"月亮",l:"广寒宫"},"5♥":{p:"二郎神",a:"开启",o:"第三只眼",l:"灌江口"},
-      "4♥":{p:"月老",a:"缠绕",o:"红绳",l:"姻缘树下"},"3♥":{p:"赵公明(财神)",a:"散发",o:"金元宝",l:"金库"},
-      "2♥":{p:"孙悟空",a:"戏耍",o:"金箍棒",l:"花果山"},
-      "A♠":{p:"邓丽君",a:"歌唱",o:"麦克风",l:"红磡体育馆"},"K♠":{p:"钱学森",a:"计算",o:"火箭",l:"发射塔架"},
-      "Q♠":{p:"林徽因",a:"测绘",o:"古建筑",l:"四合院"},"J♠":{p:"周润发",a:"射击",o:"双枪",l:"教堂大厅"},
-      "10♠":{p:"郭富城",a:"舞蹈",o:"亮片衣",l:"霓虹灯舞台"},"9♠":{p:"马云",a:"演讲",o:"笔记本电脑",l:"互联网大会"},
-      "8♠":{p:"董卿",a:"朗读",o:"书本",l:"演播室"},"7♠":{p:"李小龙",a:"踢击",o:"双节棍",l:"武道馆"},
-      "6♠":{p:"杨利伟",a:"漫步",o:"空间站",l:"外太空"},"5♠":{p:"齐白石",a:"勾勒",o:"水墨虾",l:"画室书案"},
-      "4♠":{p:"周杰伦",a:"弹奏",o:"钢琴",l:"古典城堡"},"3♠":{p:"张艺谋",a:"导演",o:"摄像机",l:"电影片场"},
-      "2♠":{p:"成龙",a:"攀爬",o:"梯子",l:"商场中庭"},
-      "A♦":{p:"曹植",a:"七步成诗",o:"墨宝",l:"铜雀台"},"K♦":{p:"秦始皇",a:"统一",o:"秦王剑",l:"阿房宫"},
-      "Q♦":{p:"花木兰",a:"梳妆/从军",o:"长弓",l:"军营帐篷"},"J♦":{p:"徐霞客",a:"攀登",o:"登山杖",l:"黄山之巅"},
-      "10♦":{p:"吴道子",a:"挥毫",o:"壁画",l:"敦煌石窟"},"9♦":{p:"狄仁杰",a:"断案",o:"亢龙锏",l:"大理寺"},
-      "8♦":{p:"沈万三",a:"计数",o:"聚宝盆",l:"江南当铺"},"7♦":{p:"欧冶子",a:"锻造",o:"铸剑炉",l:"龙泉深林"},
-      "6♦":{p:"祖冲之",a:"刻划",o:"算筹",l:"天文台"},"5♦":{p:"华佗",a:"针灸",o:"药匣",l:"医馆药房"},
-      "4♦":{p:"郑和",a:"掌舵",o:"罗盘",l:"宝船甲板"},"3♦":{p:"神农氏",a:"尝百草",o:"药草袋",l:"深山老林"},
-      "2♦":{p:"吴承恩",a:"著书",o:"鹅毛笔/卷轴",l:"草庐书斋"},
-      "A♣":{p:"盘古",a:"撑开",o:"天地",l:"混沌虚空"},"K♣":{p:"雷公",a:"敲击",o:"雷锤",l:"黑云顶"},
-      "Q♣":{p:"九尾狐",a:"魅惑",o:"狐尾",l:"青丘山"},"J♣":{p:"东海龙王",a:"呼风唤雨",o:"定海神针",l:"龙宫大殿"},
-      "10♣":{p:"女娲",a:"捏塑",o:"黄土人",l:"黄河河滩"},"9♣":{p:"后羿",a:"瞄准",o:"太阳",l:"十日荒野"},
-      "8♣":{p:"济公",a:"摇晃",o:"酒葫芦",l:"灵隐寺前"},"7♣":{p:"杨贵妃",a:"醉酒",o:"牡丹花",l:"华清池"},
-      "6♣":{p:"阎罗王",a:"勾魂",o:"生死簿",l:"森罗殿"},"5♣":{p:"扁鹊",a:"诊脉",o:"银针",l:"王府内室"},
-      "4♣":{p:"蚩尤",a:"冲锋",o:"巨斧",l:"逐鹿战场"},"3♣":{p:"九天玄女",a:"布阵",o:"兵法书",l:"古战场沙盘"},
-      "2♣":{p:"土地公",a:"遁地",o:"拐杖",l:"土地庙口"}
+    const ranks = ['A','2','3','4','5','6','7','8','9','T','J','Q','K'];
+    const suits = ['♥','♦','♣','♠'];
+    const suitColors = {'♥':'text-red-500','♦':'text-red-500','♣':'text-black','♠':'text-black'};
+
+    // 4花色完整独立OAOT数据（精准按照你提供的）
+    const oaotData = {
+      '♥': {  // 红桃 - 鳄鱼系列
+        persons: ['鳄鱼','双胞胎','和尚','闹钟','二胡','河流','耳机','恶霸','阿胶','香烟','关羽','奶奶','孙悟空'],
+        actions: ['咬住','拥抱','诵经','响起','拉奏','奔流','播放','教训','熬制','点燃','挥舞','照顾','翻筋斗'],
+        o2s: ['鸡腿','气球','木鱼','铃铛','弓弦','竹筏','音乐','棍子','汤药','烟灰缸','青龙偃月刀','被子','金箍棒'],
+        locs: ['沼泽地','游乐园','古庙','床头','舞台','长江边','地铁','小巷','中药店','阳台','三国战场','摇椅边','花果山']
+      },
+      '♦': {  // 方块 - 斯仪系列
+        persons: ['斯仪','柿子','石头山','蛇','师傅','饲料','司机','石板','天安门','司令','诸葛亮','妈妈','沙和尚'],
+        actions: ['鞠躬','摘下','攀爬','吐信','教导','撒下','开车','刻字','升旗','下令','摇扇','煮饭','挑担'],
+        o2s: ['礼帽','竹篮','绳索','老鼠','经书','鸡群','方向盘','凿子','国旗','军旗','羽扇','围裙','扁担'],
+        locs: ['礼堂','果园','山顶','草丛','寺庙','农场','公路','古迹','北京广场','指挥部','草庐','厨房','取经路']
+      },
+      '♣': {  // 梅花 - 鲨鱼系列
+        persons: ['鲨鱼','扇儿','星星','丝带','山虎','山麓','山鸡','妇女','山丘','三轮车','张飞','爸爸','猪八戒'],
+        actions: ['撕咬','扇风','闪烁','系上','咆哮','攀登','打鸣','织布','翻滚','骑行','喝醉','抽烟','吃西瓜'],
+        o2s: ['鱼饵','蒲扇','望远镜','礼物盒','爪印','登山杖','鸡冠','针线','野花','铃铛','丈八蛇矛','烟斗','钉耙'],
+        locs: ['大海','夏夜凉亭','夜空','生日派对','山林','山脚','农家院','老屋','丘陵','老街','桃园','书房','高老庄']
+      },
+      '♠': {  // 黑桃 - 梯子系列
+        persons: ['梯子','椅子','医生','钥匙','鹦鹉','石榴','显微镜','腰包','药酒','棒球','刘备','爷爷','唐僧'],
+        actions: ['爬上','坐下','听诊','打开','说话','砸开','对焦','系上','摇晃','投出','织席','讲古','取经'],
+        o2s: ['油漆桶','枕头','体温计','大门','瓜子','红籽','玻片','硬币','酒壶','手套','草鞋','茶壶','经书'],
+        locs: ['屋顶','客厅','诊所','家门口','鸟笼','果园','实验室','腰间','药店','棒球场','桃园','堂屋','西天路']
+      }
     };
 
-    const suits = ['♥','♠','♦','♣'];
-    const ranks = ['A','K','Q','J','10','9','8','7','6','5','4','3','2'];
-    let currentFour = [];
-    let showAll = false;
+    let practiceCount = parseInt(localStorage.getItem('oaotCount')) || 0;
+    let currentCard = null;
 
-    function getCardHTML(key, isFour = false) {
-      const suit = key.slice(-1);
-      const rank = key.slice(0, -1);
-      const color = (suit === '♥' || suit === '♦') ? 'suit-red' : 'suit-black';
-      const data = paolData[key];
-      return `
-        <div class="card bg-zinc-900 border-4 border-zinc-700 rounded-3xl p-6 shadow-2xl" id="card-${key}">
-          <div class="text-center">
-            <div class="text-7xl font-bold ${color}">${rank}<span class="text-8xl">${suit}</span></div>
-            <button onclick="toggleCard('${key}')" class="mt-6 px-6 py-3 bg-yellow-400 text-black font-bold rounded-2xl w-full">🔍 显示答案</button>
-          </div>
-          <div class="answer mt-6 space-y-3 text-lg border-t border-zinc-700 pt-6">
-            <div><span class="text-yellow-400">人：</span>${data.p}</div>
-            <div><span class="text-yellow-400">行：</span>${data.a}</div>
-            <div><span class="text-yellow-400">物：</span>${data.o}</div>
-            <div><span class="text-yellow-400">地：</span>${data.l}</div>
-          </div>
-        </div>`;
+    function updateCount() {
+      document.getElementById('count').textContent = practiceCount;
+      localStorage.setItem('oaotCount', practiceCount);
     }
 
-    function generateFour() {
-      const container = document.getElementById('fourCards');
-      container.innerHTML = '';
-      currentFour = [];
-      const used = new Set();
-      for (let i = 0; i < 4; i++) {
-        let key;
-        do {
-          key = ranks[Math.floor(Math.random()*13)] + suits[Math.floor(Math.random()*4)];
-        } while (used.has(key));
-        used.add(key);
-        currentFour.push(key);
-        container.innerHTML += getCardHTML(key, true);
-      }
-      showAll = false;
-      document.getElementById('globalAnswerBtn').textContent = '📖 显示全部答案';
+    function drawCard() {
+      const rankIdx = Math.floor(Math.random() * 13);
+      const suitIdx = Math.floor(Math.random() * 4);
+      const suit = suits[suitIdx];
+      const data = oaotData[suit];
+
+      currentCard = {
+        suit, rank: ranks[rankIdx], rankIdx,
+        person: data.persons[rankIdx],
+        action: data.actions[rankIdx],
+        o2: data.o2s[rankIdx],
+        loc: data.locs[rankIdx]
+      };
+      
+      document.getElementById('card').innerHTML = 
+        `${currentCard.rank}<span class="${suitColors[suit]} text-7xl">${suit}</span>`;
+      
+      document.getElementById('answer').classList.add('hidden');
+      document.getElementById('showBtn').classList.remove('hidden');
     }
 
-    function toggleCard(key) {
-      const card = document.getElementById('card-' + key);
-      card.classList.toggle('revealed');
+    function showAnswer() {
+      if (!currentCard) return;
+      document.getElementById('suitDisplay').innerHTML = 
+        `<span class="${suitColors[currentCard.suit]}">${currentCard.suit}</span>`;
+      document.getElementById('rankDisplay').textContent = currentCard.rank;
+      document.getElementById('person').textContent = currentCard.person;
+      document.getElementById('action').textContent = currentCard.action;
+      document.getElementById('o2').textContent = currentCard.o2;
+      document.getElementById('loc').textContent = currentCard.loc;
+      
+      document.getElementById('answer').classList.remove('hidden');
+      document.getElementById('showBtn').classList.add('hidden');
+      
+      practiceCount++;
+      updateCount();
     }
 
-    function toggleAllAnswers() {
-      showAll = !showAll;
-      const btn = document.getElementById('globalAnswerBtn');
-      btn.textContent = showAll ? '🙈 隐藏全部答案' : '📖 显示全部答案';
-      currentFour.forEach(key => {
-        const card = document.getElementById('card-' + key);
-        if (card) card.classList.toggle('revealed', showAll);
+    function showTab(n) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.add('hidden'));
+      document.getElementById('tab' + n).classList.remove('hidden');
+      
+      document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+        btn.classList.toggle('active', i === n);
+        if (i === n) btn.classList.add('bg-yellow-400','text-black');
+        else btn.classList.remove('bg-yellow-400','text-black');
       });
-    }
-
-    // 单张快速练
-    let currentSingle = null;
-    function generateSingle() {
-      let key;
-      do { key = ranks[Math.floor(Math.random()*13)] + suits[Math.floor(Math.random()*4)]; } while (key === currentSingle);
-      currentSingle = key;
-      document.getElementById('singleCard').innerHTML = `<span class="${(key.endsWith('♥')||key.endsWith('♦'))?'text-red-500':'text-white'} text-9xl">${key}</span>`;
-      document.getElementById('pInput').value = '';
-      document.getElementById('aInput').value = '';
-      document.getElementById('oInput').value = '';
-      document.getElementById('lInput').value = '';
-      document.getElementById('singleResult').innerHTML = '';
-    }
-
-    function checkSingle() {
-      if (!currentSingle) return;
-      const data = paolData[currentSingle];
-      const p = document.getElementById('pInput').value.trim();
-      const a = document.getElementById('aInput').value.trim();
-      const o = document.getElementById('oInput').value.trim();
-      const l = document.getElementById('lInput').value.trim();
       
-      let score = 0, msg = '';
-      if (p === data.p) score++;
-      if (a === data.a) score++;
-      if (o === data.o) score++;
-      if (l === data.l) score++;
-      
-      if (score === 4) msg = '🎉 完美！全对！';
-      else msg = `👍 ${score}/4 正确<br><small class="text-zinc-400">正确答案：<br>P:${data.p}<br>A:${data.a}<br>O:${data.o}<br>L:${data.l}</small>`;
-      
-      document.getElementById('singleResult').innerHTML = msg;
+      if (n === 1) renderTable();
     }
 
-    // 全副牌回忆
-    function renderFullDeck(filter = '') {
-      const container = document.getElementById('fullDeck');
-      container.innerHTML = '';
-      Object.keys(paolData).forEach(key => {
-        if (filter && !key.includes(filter) && !paolData[key].p.includes(filter) && !paolData[key].a.includes(filter) && !paolData[key].o.includes(filter) && !paolData[key].l.includes(filter)) return;
-        container.innerHTML += `
-          <div onclick="this.classList.toggle('revealed')" class="card bg-zinc-900 border border-zinc-700 rounded-3xl p-4 text-center cursor-pointer">
-            <div class="text-5xl font-bold ${(key.endsWith('♥')||key.endsWith('♦'))?'suit-red':'suit-black'}">${key}</div>
-            <div class="answer mt-4 text-sm text-left space-y-1">
-              <div>P: ${paolData[key].p}</div>
-              <div>A: ${paolData[key].a}</div>
-              <div>O: ${paolData[key].o}</div>
-              <div>L: ${paolData[key].l}</div>
-            </div>
-          </div>`;
-      });
-    }
-
-    function filterDeck() {
-      renderFullDeck(document.getElementById('search2').value.trim());
-    }
-
-    // 编码表
-    function renderTable(filter = '') {
-      const tbody = document.getElementById('paolTable');
-      tbody.innerHTML = '';
-      Object.keys(paolData).forEach(key => {
-        const d = paolData[key];
-        if (filter && !key.includes(filter) && !d.p.includes(filter) && !d.a.includes(filter) && !d.o.includes(filter) && !d.l.includes(filter)) return;
-        tbody.innerHTML += `
-          <tr class="border-b border-zinc-800 hover:bg-zinc-900">
-            <td class="p-4 font-bold text-xl ${(key.endsWith('♥')||key.endsWith('♦'))?'text-red-500':'text-white'}">${key}</td>
-            <td class="p-4">${d.p}</td>
-            <td class="p-4">${d.a}</td>
-            <td class="p-4">${d.o}</td>
-            <td class="p-4">${d.l}</td>
+    function renderTable() {
+      let html = '';
+      suits.forEach(suit => {
+        const data = oaotData[suit];
+        ranks.forEach((r, i) => {
+          html += `<tr class="border-t border-zinc-700 hover:bg-zinc-800">
+            <td class="p-4"><span class="${suitColors[suit]} text-xl">${suit}</span></td>
+            <td class="p-4 font-bold">${r}</td>
+            <td class="p-4">${data.persons[i]}</td>
+            <td class="p-4">${data.actions[i]}</td>
+            <td class="p-4">${data.o2s[i]}</td>
+            <td class="p-4">${data.locs[i]}</td>
           </tr>`;
+        });
       });
-    }
-
-    function filterTable() {
-      renderTable(document.getElementById('search3').value.trim());
-    }
-
-    function switchMode(n) {
-      document.querySelectorAll('.mode').forEach(m => m.classList.add('hidden'));
-      document.getElementById('mode' + n).classList.remove('hidden');
-      document.querySelectorAll('.mode-btn').forEach((b, i) => {
-        b.classList.toggle('active', i === n);
-        b.classList.toggle('bg-yellow-400', i === n);
-        b.classList.toggle('text-black', i === n);
-      });
-      if (n === 2) renderFullDeck();
-      if (n === 3) renderTable();
+      document.getElementById('tableBody').innerHTML = html;
     }
 
     // 初始化
-    window.onload = () => {
-      switchMode(0);
-      generateFour();
-    };
+    showTab(0);
+    updateCount();
   </script>
 </body>
 </html>
