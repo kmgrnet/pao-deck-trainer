@@ -3,14 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title> 数字玩家 OAOT 记忆训练器 - 4花色终极版</title>
+  <title>兄弟 OAOT 记忆训练器 - 4花色终极版</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body class="bg-zinc-950 text-white min-h-screen">
   <div class="max-w-4xl mx-auto p-6">
     <h1 class="text-4xl font-bold text-center mb-8 flex items-center justify-center gap-3">
-      <i class="fas fa-brain text-yellow-400"></i> 数字玩家 OAOT 记忆训练器（4花色终极版）
+      <i class="fas fa-brain text-yellow-400"></i> 兄弟 OAOT 记忆训练器（4花色终极版）
     </h1>
 
     <div class="flex justify-center gap-4 mb-8 flex-wrap">
@@ -19,48 +20,40 @@
       <button onclick="showTab(1)" class="tab-btn px-6 py-2 rounded-full hover:bg-zinc-800">完整映射表</button>
     </div>
 
-    <!-- 单张练习 Tab -->
+    <!-- 单张练习 -->
     <div id="tab0" class="tab">
       <div class="bg-zinc-900 p-8 rounded-3xl text-center">
         <div id="card" class="text-8xl font-bold mb-8 text-yellow-400">点击抽牌</div>
-        <button onclick="drawSingle()" class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold text-2xl py-6 rounded-3xl mb-6">
-          🎴 抽一张牌
-        </button>
+        <button onclick="drawSingle()" class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold text-2xl py-6 rounded-3xl mb-6">🎴 抽一张牌</button>
         
         <div id="answerSingle" class="hidden bg-zinc-800 p-6 rounded-3xl text-left space-y-4">
           <div class="grid grid-cols-2 gap-4 text-lg">
             <div><span class="text-yellow-400">花色：</span><span id="suitDisplaySingle" class="font-bold"></span></div>
             <div><span class="text-yellow-400">牌点：</span><span id="rankDisplaySingle"></span></div>
-            <div><span class="text-yellow-400">形象：</span><span id="personSingle" class="font-medium"></span></div>
+            <div><span class="text-yellow-400">形象：</span><span id="personSingle"></span></div>
             <div><span class="text-yellow-400">动作：</span><span id="actionSingle"></span></div>
             <div><span class="text-yellow-400">物体：</span><span id="o2Single"></span></div>
             <div><span class="text-yellow-400">地点：</span><span id="locSingle"></span></div>
           </div>
         </div>
 
-        <button onclick="showSingleAnswer()" id="showBtnSingle"
-                class="hidden mt-4 w-full bg-green-500 hover:bg-green-400 text-black font-bold py-4 rounded-3xl">
-          👀 显示答案
-        </button>
+        <div class="flex gap-4 mt-6">
+          <button onclick="showSingleAnswer()" id="showBtnSingle" class="hidden flex-1 bg-green-500 hover:bg-green-400 text-black font-bold py-4 rounded-3xl">👀 显示答案</button>
+          <button onclick="shareToWeChat()" id="shareBtnSingle" class="hidden flex-1 bg-blue-500 hover:bg-blue-400 text-white font-bold py-4 rounded-3xl">📤 分享到微信</button>
+        </div>
       </div>
     </div>
 
-    <!-- 4张连锁 Tab -->
+    <!-- 4张连锁 -->
     <div id="tab2" class="tab hidden">
       <div class="bg-zinc-900 p-8 rounded-3xl">
-        <button onclick="drawFourCards()" 
-                class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold text-2xl py-6 rounded-3xl mb-8">
-          🎴🎴🎴🎴 抽4张连锁牌
-        </button>
-
-        <div class="grid grid-cols-4 gap-4 mb-8" id="fourCards">
-          <!-- JS动态生成4张牌 -->
+        <button onclick="drawFourCards()" class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold text-2xl py-6 rounded-3xl mb-8">🎴🎴🎴🎴 抽4张连锁牌</button>
+        <div class="grid grid-cols-4 gap-4 mb-8" id="fourCards"></div>
+        
+        <div class="flex gap-4">
+          <button onclick="showFourAnswer()" id="showBtnFour" class="hidden flex-1 bg-green-500 hover:bg-green-400 text-black font-bold py-5 rounded-3xl text-xl">👀 显示连锁答案</button>
+          <button onclick="shareToWeChat()" id="shareBtnFour" class="hidden flex-1 bg-blue-500 hover:bg-blue-400 text-white font-bold py-5 rounded-3xl text-xl">📤 分享到微信</button>
         </div>
-
-        <button onclick="showFourAnswer()" id="showBtnFour"
-                class="hidden w-full bg-green-500 hover:bg-green-400 text-black font-bold py-5 rounded-3xl text-xl">
-          👀 显示连锁答案（第1形象 + 第2动作 + 第3物体 + 第4地点）
-        </button>
 
         <div id="fourAnswer" class="hidden mt-6 bg-zinc-800 p-6 rounded-3xl text-xl leading-relaxed text-center">
           <span id="chainResult" class="text-yellow-400 font-bold"></span>
@@ -68,9 +61,14 @@
       </div>
     </div>
 
-    <!-- 映射表 Tab -->
+    <!-- 映射表 + 搜索框 -->
     <div id="tab1" class="tab hidden">
-      <div class="bg-zinc-900 rounded-3xl overflow-hidden">
+      <div class="bg-zinc-800 p-4 rounded-t-3xl">
+        <input id="searchInput" type="text" 
+               class="w-full bg-zinc-900 border border-zinc-700 rounded-2xl px-6 py-4 text-lg focus:outline-none focus:border-yellow-400"
+               placeholder="🔍 搜索形象、动作、物体、地点、牌点...">
+      </div>
+      <div class="bg-zinc-900 rounded-b-3xl overflow-hidden">
         <table class="w-full text-left">
           <thead class="bg-zinc-800 sticky top-0">
             <tr>
@@ -92,8 +90,27 @@
     </div>
   </div>
 
+  <!-- 微信分享模态框 -->
+  <div id="shareModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+    <div class="bg-zinc-900 rounded-3xl max-w-sm w-full mx-4 p-8 text-center">
+      <h2 class="text-2xl font-bold mb-6">分享到微信</h2>
+      
+      <div id="qrCode" class="mx-auto bg-white p-4 rounded-2xl inline-block mb-6"></div>
+      
+      <div class="bg-zinc-800 rounded-2xl p-4 mb-6 text-left text-sm">
+        <div class="font-medium mb-2">推荐文案（已复制到剪贴板）</div>
+        <div id="shareText" class="text-zinc-300 leading-relaxed"></div>
+      </div>
+
+      <div class="flex gap-4">
+        <button onclick="copyShareText()" class="flex-1 bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-4 rounded-2xl">📋 复制文案</button>
+        <button onclick="closeShareModal()" class="flex-1 bg-zinc-700 hover:bg-zinc-600 font-bold py-4 rounded-2xl">关闭</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // === 原有4花色数据（完全不变）===
+    // === 4花色数据（不变）===
     const ranks = ['A','2','3','4','5','6','7','8','9','T','J','Q','K'];
     const suits = ['♥','♦','♣','♠'];
     const suitColors = {'♥':'text-red-500','♦':'text-red-500','♣':'text-black','♠':'text-black'};
@@ -108,22 +125,26 @@
     let practiceCount = parseInt(localStorage.getItem('oaotCount')) || 0;
     let currentSingle = null;
     let currentFour = null;
+    let qrCodeInstance = null;
+
+    const siteUrl = window.location.href;
+    const shareTextBase = `兄弟，我在用这个超强的OAOT记忆训练器练习！\n4花色52张全自定义编码，单张+4张连锁模式超好用！\n快来一起练：${siteUrl}`;
 
     function updateCount() {
       document.getElementById('count').textContent = practiceCount;
       localStorage.setItem('oaotCount', practiceCount);
     }
 
-    // 单张模式（保持不变）
+    // 单张练习
     function drawSingle() {
       const rankIdx = Math.floor(Math.random() * 13);
       const suitIdx = Math.floor(Math.random() * 4);
       const suit = suits[suitIdx];
-      const data = oaotData[suit];
-      currentSingle = { suit, rank: ranks[rankIdx], rankIdx, data };
+      currentSingle = { suit, rank: ranks[rankIdx], rankIdx, data: oaotData[suit] };
       document.getElementById('card').innerHTML = `${currentSingle.rank}<span class="${suitColors[suit]} text-7xl">${suit}</span>`;
       document.getElementById('answerSingle').classList.add('hidden');
       document.getElementById('showBtnSingle').classList.remove('hidden');
+      document.getElementById('shareBtnSingle').classList.add('hidden');
     }
 
     function showSingleAnswer() {
@@ -137,29 +158,30 @@
       document.getElementById('locSingle').textContent = d.locs[currentSingle.rankIdx];
       document.getElementById('answerSingle').classList.remove('hidden');
       document.getElementById('showBtnSingle').classList.add('hidden');
+      document.getElementById('shareBtnSingle').classList.remove('hidden');
       practiceCount++;
       updateCount();
     }
 
-    // ==================== 4张连锁模式 ====================
+    // 4张连锁
     function drawFourCards() {
       const allCards = [];
       const used = new Set();
       while (allCards.length < 4) {
-        const rankIdx = Math.floor(Math.random() * 13);
-        const suitIdx = Math.floor(Math.random() * 4);
-        const suit = suits[suitIdx];
-        const rank = ranks[rankIdx];
+        const rIdx = Math.floor(Math.random() * 13);
+        const sIdx = Math.floor(Math.random() * 4);
+        const suit = suits[sIdx];
+        const rank = ranks[rIdx];
         const key = suit + rank;
         if (!used.has(key)) {
           used.add(key);
           const data = oaotData[suit];
           allCards.push({
-            suit, rank, rankIdx,
-            person: data.persons[rankIdx],
-            action: data.actions[rankIdx],
-            o2: data.o2s[rankIdx],
-            loc: data.locs[rankIdx]
+            suit, rank, rankIdx: rIdx,
+            person: data.persons[rIdx],
+            action: data.actions[rIdx],
+            o2: data.o2s[rIdx],
+            loc: data.locs[rIdx]
           });
         }
       }
@@ -174,37 +196,35 @@
       });
       document.getElementById('fourCards').innerHTML = html;
       document.getElementById('showBtnFour').classList.remove('hidden');
+      document.getElementById('shareBtnFour').classList.add('hidden');
       document.getElementById('fourAnswer').classList.add('hidden');
     }
 
     function showFourAnswer() {
       if (!currentFour) return;
-      const p1 = currentFour[0].person;
-      const a2 = currentFour[1].action;
-      const o3 = currentFour[2].o2;
-      const l4 = currentFour[3].loc;
-      document.getElementById('chainResult').innerHTML = 
-        `<span class="text-red-400">${p1}</span> <span class="text-yellow-400">${a2}</span> <span class="text-green-400">${o3}</span> <span class="text-blue-400">${l4}</span>`;
+      const result = `${currentFour[0].person} ${currentFour[1].action} ${currentFour[2].o2} ${currentFour[3].loc}`;
+      document.getElementById('chainResult').textContent = result;
       document.getElementById('fourAnswer').classList.remove('hidden');
       document.getElementById('showBtnFour').classList.add('hidden');
+      document.getElementById('shareBtnFour').classList.remove('hidden');
       practiceCount++;
       updateCount();
     }
 
-    function showTab(n) {
-      document.querySelectorAll('.tab').forEach(t => t.classList.add('hidden'));
-      document.getElementById('tab' + n).classList.remove('hidden');
-      
-      document.querySelectorAll('.tab-btn').forEach((btn, i) => {
-        const target = btn.getAttribute('onclick').match(/\d+/)[0];
-        btn.classList.toggle('active', parseInt(target) === n);
-        if (parseInt(target) === n) btn.classList.add('bg-yellow-400','text-black');
-        else btn.classList.remove('bg-yellow-400','text-black');
+    // 搜索框
+    function setupSearch() {
+      const input = document.getElementById('searchInput');
+      input.addEventListener('input', () => {
+        const term = input.value.toLowerCase().trim();
+        const rows = document.querySelectorAll('#tableBody tr');
+        rows.forEach(row => {
+          const text = row.textContent.toLowerCase();
+          row.style.display = term === '' || text.includes(term) ? '' : 'none';
+        });
       });
-      
-      if (n === 1) renderTable();
     }
 
+    // 渲染映射表
     function renderTable() {
       let html = '';
       suits.forEach(suit => {
@@ -223,9 +243,58 @@
       document.getElementById('tableBody').innerHTML = html;
     }
 
+    // 微信分享
+    function shareToWeChat() {
+      const modal = document.getElementById('shareModal');
+      modal.classList.remove('hidden');
+
+      // 生成二维码
+      const qrDiv = document.getElementById('qrCode');
+      qrDiv.innerHTML = '';
+      new QRCode(qrDiv, {
+        text: siteUrl,
+        width: 220,
+        height: 220,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+
+      // 文案
+      document.getElementById('shareText').textContent = shareTextBase;
+
+      // 自动复制文案
+      navigator.clipboard.writeText(shareTextBase);
+    }
+
+    function copyShareText() {
+      navigator.clipboard.writeText(shareTextBase);
+      alert('✅ 文案已复制到剪贴板，直接发微信给兄弟们吧！');
+    }
+
+    function closeShareModal() {
+      document.getElementById('shareModal').classList.add('hidden');
+    }
+
+    function showTab(n) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.add('hidden'));
+      document.getElementById('tab' + n).classList.remove('hidden');
+
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active', 'bg-yellow-400', 'text-black');
+        if (btn.getAttribute('onclick').includes(n)) {
+          btn.classList.add('active', 'bg-yellow-400', 'text-black');
+        }
+      });
+
+      if (n === 1) renderTable();
+    }
+
     // 初始化
     showTab(0);
     updateCount();
+    renderTable();
+    setupSearch();
   </script>
 </body>
 </html>
