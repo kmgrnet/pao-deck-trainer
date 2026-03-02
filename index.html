@@ -25,7 +25,6 @@
       <div class="bg-zinc-900 p-8 rounded-3xl text-center">
         <div id="card" class="text-8xl font-bold mb-8 text-yellow-400">点击抽牌</div>
         <button onclick="drawSingle()" class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold text-2xl py-6 rounded-3xl mb-6">🎴 抽一张牌</button>
-        
         <div id="answerSingle" class="hidden bg-zinc-800 p-6 rounded-3xl text-left space-y-4">
           <div class="grid grid-cols-2 gap-4 text-lg">
             <div><span class="text-yellow-400">花色：</span><span id="suitDisplaySingle" class="font-bold"></span></div>
@@ -36,7 +35,6 @@
             <div><span class="text-yellow-400">地点：</span><span id="locSingle"></span></div>
           </div>
         </div>
-
         <div class="flex gap-4 mt-6">
           <button onclick="showSingleAnswer()" id="showBtnSingle" class="hidden flex-1 bg-green-500 hover:bg-green-400 text-black font-bold py-4 rounded-3xl">👀 显示答案</button>
           <button onclick="shareToWeChat()" id="shareBtnSingle" class="hidden flex-1 bg-blue-500 hover:bg-blue-400 text-white font-bold py-4 rounded-3xl">📤 分享到微信</button>
@@ -49,24 +47,20 @@
       <div class="bg-zinc-900 p-8 rounded-3xl">
         <button onclick="drawFourCards()" class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold text-2xl py-6 rounded-3xl mb-8">🎴🎴🎴🎴 抽4张连锁牌</button>
         <div class="grid grid-cols-4 gap-4 mb-8" id="fourCards"></div>
-        
         <div class="flex gap-4">
           <button onclick="showFourAnswer()" id="showBtnFour" class="hidden flex-1 bg-green-500 hover:bg-green-400 text-black font-bold py-5 rounded-3xl text-xl">👀 显示连锁答案</button>
           <button onclick="shareToWeChat()" id="shareBtnFour" class="hidden flex-1 bg-blue-500 hover:bg-blue-400 text-white font-bold py-5 rounded-3xl text-xl">📤 分享到微信</button>
         </div>
-
         <div id="fourAnswer" class="hidden mt-6 bg-zinc-800 p-6 rounded-3xl text-xl leading-relaxed text-center">
           <span id="chainResult" class="text-yellow-400 font-bold"></span>
         </div>
       </div>
     </div>
 
-    <!-- 完整映射表 -->
+    <!-- 映射表 -->
     <div id="tab1" class="tab hidden">
       <div class="bg-zinc-800 p-4 rounded-t-3xl">
-        <input id="searchInput" type="text" 
-               class="w-full bg-zinc-900 border border-zinc-700 rounded-2xl px-6 py-4 text-lg focus:outline-none focus:border-yellow-400"
-               placeholder="🔍 搜索形象、动作、物体、地点、故事...">
+        <input id="searchInput" type="text" class="w-full bg-zinc-900 border border-zinc-700 rounded-2xl px-6 py-4 text-lg focus:outline-none focus:border-yellow-400" placeholder="🔍 搜索形象、动作、物体、地点、故事...">
       </div>
       <div class="bg-zinc-900 rounded-b-3xl overflow-x-auto">
         <table class="w-full text-left min-w-[1300px]">
@@ -112,37 +106,80 @@
     const suits = ['♥','♦','♣','♠'];
     const suitColors = {'♥':'text-red-500','♦':'text-red-500','♣':'text-black','♠':'text-black'};
 
-    const oaotData = {
+    const oaotData = { /* 你的4花色数据保持不变 */ 
       '♥': { persons: ['鳄鱼','双胞胎','和尚','闹钟','二胡','河流','耳机','恶霸','阿胶','香烟','关羽','奶奶','孙悟空'], actions: ['咬住','拥抱','诵经','响起','拉奏','奔流','播放','教训','熬制','点燃','挥舞','照顾','翻筋斗'], o2s: ['鸡腿','气球','木鱼','铃铛','弓弦','竹筏','音乐','棍子','汤药','烟灰缸','青龙偃月刀','被子','金箍棒'], locs: ['沼泽地','游乐园','古庙','床头','舞台','长江边','地铁','小巷','中药店','阳台','三国战场','摇椅边','花果山'] },
       '♦': { persons: ['斯仪','柿子','石头山','蛇','师傅','饲料','司机','石板','天安门','司令','诸葛亮','妈妈','沙和尚'], actions: ['鞠躬','摘下','攀爬','吐信','教导','撒下','开车','刻字','升旗','下令','摇扇','煮饭','挑担'], o2s: ['礼帽','竹篮','绳索','老鼠','经书','鸡群','方向盘','凿子','国旗','军旗','羽扇','围裙','扁担'], locs: ['礼堂','果园','山顶','草丛','寺庙','农场','公路','古迹','北京广场','指挥部','草庐','厨房','取经路'] },
       '♣': { persons: ['鲨鱼','扇儿','星星','丝带','山虎','山麓','山鸡','妇女','山丘','三轮车','张飞','爸爸','猪八戒'], actions: ['撕咬','扇风','闪烁','系上','咆哮','攀登','打鸣','织布','翻滚','骑行','喝醉','抽烟','吃西瓜'], o2s: ['鱼饵','蒲扇','望远镜','礼物盒','爪印','登山杖','鸡冠','针线','野花','铃铛','丈八蛇矛','烟斗','钉耙'], locs: ['大海','夏夜凉亭','夜空','生日派对','山林','山脚','农家院','老屋','丘陵','老街','桃园','书房','高老庄'] },
       '♠': { persons: ['梯子','椅子','医生','钥匙','鹦鹉','石榴','显微镜','腰包','药酒','棒球','刘备','爷爷','唐僧'], actions: ['爬上','坐下','听诊','打开','说话','砸开','对焦','系上','摇晃','投出','织席','讲古','取经'], o2s: ['油漆桶','枕头','体温计','大门','瓜子','红籽','玻片','硬币','酒壶','手套','草鞋','茶壶','经书'], locs: ['屋顶','客厅','诊所','家门口','鸟笼','果园','实验室','腰间','药店','棒球场','桃园','堂屋','西天路'] }
     };
 
+    // 52张完整故事（手动编写）
+    const stories = {
+      '♠A': '我扛着梯子爬上屋顶，提着油漆桶刷得满墙鲜亮，风吹得衣服猎猎作响。',
+      '♠2': '我舒服坐在椅子上，抱着软软枕头，在客厅里看书放松。',
+      '♠3': '医生认真听诊，用体温计测体温，在诊所里耐心治病救人。',
+      '♠4': '我用钥匙打开大门，走进家门口的温暖灯光。',
+      '♠5': '鹦鹉在鸟笼里说话，啄着瓜子开心学舌。',
+      '♠6': '我砸开石榴，红籽洒满果园，甜汁四溅。',
+      '♠7': '显微镜对焦玻片，在实验室里发现微小神奇的世界。',
+      '♠8': '我系上腰包，装满硬币走在腰间叮当作响。',
+      '♠9': '药酒摇晃酒壶，在药店里飘出浓郁药香。',
+      '♠T': '棒球投出手套，在棒球场上飞向本垒得分。',
+      '♠J': '刘备织席做草鞋，在桃园里和兄弟们谈心。',
+      '♠Q': '爷爷在堂屋讲古，拿着茶壶慢慢品茶。',
+      '♠K': '唐僧取经拿着经书，在西天路上坚定前行。',
+      '♥A': '鳄鱼咬住鸡腿，在沼泽地里大快朵颐。',
+      '♥2': '双胞胎紧紧拥抱气球，在游乐园里笑声不断。',
+      '♥3': '和尚诵经敲木鱼，在古庙里香烟袅袅。',
+      '♥4': '闹钟响起铃铛，在床头叫醒我起床。',
+      '♥5': '二胡拉奏弓弦，在舞台上余音绕梁。',
+      '♥6': '河流奔流竹筏，在长江边乘风破浪。',
+      '♥7': '耳机播放音乐，在地铁里沉浸节奏。',
+      '♥8': '恶霸教训棍子，在小巷里教训小混混。',
+      '♥9': '阿胶熬制汤药，在中药店里飘着药香。',
+      '♥T': '香烟点燃烟灰缸，在阳台上吞云吐雾。',
+      '♥J': '关羽挥舞青龙偃月刀，在三国战场上英姿飒爽。',
+      '♥Q': '奶奶照顾被子，在摇椅边轻轻摇晃。',
+      '♥K': '孙悟空翻筋斗金箍棒，在花果山上大闹天宫。',
+      '♣A': '鲨鱼撕咬鱼饵，在大海里掀起巨浪。',
+      '♣2': '扇儿扇风蒲扇，在夏夜凉亭里凉风习习。',
+      '♣3': '星星闪烁望远镜，在夜空下观测星河。',
+      '♣4': '丝带系上礼物盒，在生日派对里惊喜连连。',
+      '♣5': '山虎咆哮爪印，在山林里震慑百兽。',
+      '♣6': '山麓攀登登山杖，在山脚下努力向上。',
+      '♣7': '山鸡打鸣鸡冠，在农家院里迎接朝阳。',
+      '♣8': '妇女织布针线，在老屋里纺出温暖布匹。',
+      '♣9': '山丘翻滚野花，在丘陵上嬉戏玩耍。',
+      '♣T': '三轮车骑行铃铛，在老街上叮当作响。',
+      '♣J': '张飞喝醉丈八蛇矛，在桃园里豪气冲天。',
+      '♣Q': '爸爸抽烟烟斗，在书房里思考人生。',
+      '♣K': '猪八戒吃西瓜钉耙，在高老庄里大快朵颐。',
+      '♦A': '斯仪鞠躬戴礼帽，在礼堂里彬彬有礼。',
+      '♦2': '柿子摘下竹篮，在果园里丰收喜悦。',
+      '♦3': '石头山攀爬绳索，在山顶上俯瞰大地。',
+      '♦4': '蛇吐信老鼠，在草丛里悄然捕猎。',
+      '♦5': '师傅教导经书，在寺庙里传授智慧。',
+      '♦6': '饲料撒下鸡群，在农场里鸡飞狗跳。',
+      '♦7': '司机开车方向盘，在公路上驰骋向前。',
+      '♦8': '石板刻字凿子，在古迹上留下历史痕迹。',
+      '♦9': '天安门升旗国旗，在北京广场庄严飘扬。',
+      '♦T': '司令下令军旗，在指挥部里运筹帷幄。',
+      '♦J': '诸葛亮摇扇羽扇，在草庐里智谋天下。',
+      '♦Q': '妈妈煮饭围裙，在厨房里温暖全家。',
+      '♦K': '沙和尚挑担扁担，在取经路上默默守护。'
+    };
+
     let practiceCount = parseInt(localStorage.getItem('oaotCount')) || 0;
     let currentSingle = null;
     let currentFour = null;
     const siteUrl = window.location.href;
-    const shareTextBase = `兄弟，我在用这个超强OAOT记忆训练器！4花色52张全自定义+完整故事+语音朗读，超好记！快来练：${siteUrl}`;
+    const shareTextBase = `兄弟，我在用这个超强OAOT记忆训练器！52张完整故事+4张连锁，超好记！快来练：${siteUrl}`;
 
     function updateCount() {
       document.getElementById('count').textContent = practiceCount;
       localStorage.setItem('oaotCount', practiceCount);
     }
 
-    // 自动语音朗读（中文）
-    function speak(text) {
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'zh-CN';
-        utterance.rate = 1.0;
-        utterance.pitch = 1.0;
-        window.speechSynthesis.speak(utterance);
-      }
-    }
-
-    // 单张练习
     function drawSingle() {
       const rankIdx = Math.floor(Math.random() * 13);
       const suitIdx = Math.floor(Math.random() * 4);
@@ -157,26 +194,18 @@
     function showSingleAnswer() {
       if (!currentSingle) return;
       const d = currentSingle.data;
-      const idx = currentSingle.rankIdx;
       document.getElementById('suitDisplaySingle').innerHTML = `<span class="${suitColors[currentSingle.suit]}">${currentSingle.suit}</span>`;
       document.getElementById('rankDisplaySingle').textContent = currentSingle.rank;
-      document.getElementById('personSingle').textContent = d.persons[idx];
-      document.getElementById('actionSingle').textContent = d.actions[idx];
-      document.getElementById('o2Single').textContent = d.o2s[idx];
-      document.getElementById('locSingle').textContent = d.locs[idx];
+      document.getElementById('personSingle').textContent = d.persons[currentSingle.rankIdx];
+      document.getElementById('actionSingle').textContent = d.actions[currentSingle.rankIdx];
+      document.getElementById('o2Single').textContent = d.o2s[currentSingle.rankIdx];
+      document.getElementById('locSingle').textContent = d.locs[currentSingle.rankIdx];
       document.getElementById('answerSingle').classList.remove('hidden');
       document.getElementById('showBtnSingle').classList.add('hidden');
       document.getElementById('shareBtnSingle').classList.remove('hidden');
-
-      // 自动朗读完整故事
-      const story = `${d.persons[idx]}${d.actions[idx]}${d.o2s[idx]}，在${d.locs[idx]}。`;
-      speak(story);
-
-      practiceCount++;
-      updateCount();
+      practiceCount++; updateCount();
     }
 
-    // 4张连锁
     function drawFourCards() {
       const allCards = [];
       const used = new Set();
@@ -210,32 +239,23 @@
       document.getElementById('fourAnswer').classList.remove('hidden');
       document.getElementById('showBtnFour').classList.add('hidden');
       document.getElementById('shareBtnFour').classList.remove('hidden');
-
-      // 自动朗读连锁答案
-      speak(result);
-
-      practiceCount++;
-      updateCount();
+      practiceCount++; updateCount();
     }
 
-    // 渲染映射表（52张完整故事）
     function renderTable() {
       let html = '';
       suits.forEach(suit => {
         const data = oaotData[suit];
         ranks.forEach((r, i) => {
-          const p = data.persons[i];
-          const a = data.actions[i];
-          const o = data.o2s[i];
-          const l = data.locs[i];
-          const story = `${p}${a}${o}，在${l}。`;
+          const key = suit + r;
+          const story = stories[key];
           html += `<tr class="border-t border-zinc-700 hover:bg-zinc-800">
             <td class="p-4"><span class="${suitColors[suit]} text-xl">${suit}</span></td>
             <td class="p-4 font-bold">${r}</td>
-            <td class="p-4">${p}</td>
-            <td class="p-4">${a}</td>
-            <td class="p-4">${o}</td>
-            <td class="p-4">${l}</td>
+            <td class="p-4">${data.persons[i]}</td>
+            <td class="p-4">${data.actions[i]}</td>
+            <td class="p-4">${data.o2s[i]}</td>
+            <td class="p-4">${data.locs[i]}</td>
             <td class="p-4 text-emerald-300">${story}</td>
           </tr>`;
         });
@@ -278,9 +298,8 @@
       document.querySelectorAll('.tab').forEach(t => t.classList.add('hidden'));
       document.getElementById('tab' + n).classList.remove('hidden');
       document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('onclick').includes(n));
-        btn.classList.toggle('bg-yellow-400', btn.getAttribute('onclick').includes(n));
-        btn.classList.toggle('text-black', btn.getAttribute('onclick').includes(n));
+        btn.classList.remove('active', 'bg-yellow-400', 'text-black');
+        if (btn.getAttribute('onclick').includes(n)) btn.classList.add('active', 'bg-yellow-400', 'text-black');
       });
       if (n === 1) renderTable();
     }
